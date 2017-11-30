@@ -1,5 +1,5 @@
 var FB = require("fb");
-var FB_ACCESS_TOKEN = process.env.ACCESS_TOKEN;
+var FB_ACCESS_TOKEN = process.env.FB_ACCESS_TOKEN;
 FB.setAccessToken(FB_ACCESS_TOKEN);
 // var page_ids = ["music.iitd","rendezvous.iitd","acesacm"];
 var page_ids = [
