@@ -86,6 +86,7 @@ intents.matches('profile', '/profile');
 bot.beginDialogAction('help', '/help', { matches: /^help/i });
 intents.matches('developers','/developers');
 intents.matches('repeat', '/repeat');
+intents.matches('messagePage','/messagePage');
 
 intents.onDefault(builder.DialogAction.send("I'm sorry. I didn't understand."));
 
@@ -109,7 +110,7 @@ bot.dialog('/main',[
         }
     },
     function(session,args,next) {
-        builder.Prompts.choice(session, "What would you like to get (type end to quit)?", "Upcoming Events|Class Schedule|Who is|Exam Schedule|FAQ|Course Info|Profile Setup| Help|Developers");
+        builder.Prompts.choice(session, "What would you like to get (type end to quit)?", "Message Page|Upcoming Events|Class Schedule|Who is|Exam Schedule|FAQ|Course Info|Profile Setup| Help|Developers");
     },
     function(session,results){
         if(results.response){
@@ -167,6 +168,10 @@ bot.dialog('/main',[
                         break;
                     case "Help":
                         session.beginDialog('/help');
+                        break;
+                    case "Message Page":
+                        session.send('Hi! Send your message to the page admins\n Type end to chat with Campus-Bot');
+                        session.beginDialog('/messagePage');
                         break;
                 }
             }
@@ -529,6 +534,14 @@ bot.dialog('/qna', [
             }
             );
         session.endDialog();
+    }
+]);
+
+bot.dialog('/messagePage', [
+    function (session) {
+    },
+    function (session, results) {
+        session.replaceDialog('/messagePage');
     }
 ]);
 
