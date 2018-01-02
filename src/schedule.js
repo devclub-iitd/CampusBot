@@ -1,20 +1,19 @@
 var fs = require("fs-extra");
-
-// var course_db = (process.env.NODE_ENV=="development")?"./database/course_database.json":"D:\\home\\site\\wwwroot\\messages\\database\\course_database.json";
-// var slot_db = (process.env.NODE_ENV=="development")?"./database/slot_database.json":"D:\\home\\site\\wwwroot\\messages\\database\\slot_database.json";
-// var exam_slot_db = (process.env.NODE_ENV=='development')?"./database/slot_exam.json":"D:\\home\\site\\wwwroot\\messages\\database\\slot_exam.json";
-// var student_database_db = (process.env.NODE_ENV=="development")?"./database/data_base.json":"D:\\home\\site\\wwwroot\\messages\\database\\data_base.json";
  
-var COURSE_DB_PATH = "./database/course_venue.json";
-var SLOT_DB_PATH = "./database/slot.json";
-var EXAM_SLOT_DB_PATH = "./database/exam.json";
-var STUDENT_DB_PATH = "./database/student.json";
+if(process.env.COURSES_RELEASED.toUpperCase()=='TRUE'){
+    var STUDENT_DB_PATH = "./database/"+process.env.DB_PATH+"/student.json";
+    var student_database = JSON.parse(fs.readFileSync(STUDENT_DB_PATH));
+    
+    var COURSE_VENUE_DB_PATH = "./database/"+process.env.DB_PATH+"/venue.json";
+    var course_venue_database = JSON.parse(fs.readFileSync(COURSE_VENUE_DB_PATH));
+    var SLOT_DB_PATH = "./database/"+process.env.DB_PATH+"/slot.json";
+    var slot_database = JSON.parse(fs.readFileSync(SLOT_DB_PATH));
+}
 
-
-var course_database = JSON.parse(fs.readFileSync(COURSE_DB_PATH));
-var slot_database = JSON.parse(fs.readFileSync(SLOT_DB_PATH));
-var exam_slot_database = JSON.parse(fs.readFileSync(EXAM_SLOT_DB_PATH));
-var student_database = JSON.parse(fs.readFileSync(STUDENT_DB_PATH));
+if(process.env.EXAMS_RELEASED.toUpperCase()=='TRUE'){
+    var EXAM_SLOT_DB_PATH = "./database/"+process.env.DB_PATH+"/exam.json";
+    var exam_slot_database = JSON.parse(fs.readFileSync(EXAM_SLOT_DB_PATH));
+}
 
 
 function get_exam_schedule(exam_type,courses)
@@ -60,10 +59,10 @@ function get_exam_schedule(exam_type,courses)
 function get_class_schedule(course)
 {
     var slot = course.slot.toUpperCase().trim();
-    course = course.course.toUpperCase().trim();
-    if(course in course_database && slot in course_database[course])
+    course = course.code.toUpperCase().trim();
+    if(course in course_venue_database && slot in course_venue_database[course])
     {
-        return {"location": course_database[course][slot], "timing": slot_database[slot]};
+        return {"location": course_venue_database[course][slot], "timing": slot_database[slot]};
     }
     else
     {
@@ -80,7 +79,7 @@ function get_day_schedule(day,courses)
         var sch = get_class_schedule(courses[i]);
         if(sch !== undefined && day in sch.timing)
         {
-            schedule.push({"course":courses[i].course.toUpperCase().trim(),"slot":courses[i].slot.toUpperCase().trim(),"location":sch.location,"timing":sch.timing[day]});
+            schedule.push({"course":courses[i].code.toUpperCase().trim(),"slot":courses[i].slot.toUpperCase().trim(),"location":sch.location,"timing":sch.timing[day]});
         }
     }
     schedule.sort(function(a,b)
@@ -112,7 +111,7 @@ function iscoursePresent(entry,course_code)
     courses= courses.courses;
     for(var i=0;i<courses.length;i++)
     {
-        if(course_code == courses[i].course.toUpperCase().trim()){
+        if(course_code == courses[i].code.toUpperCase().trim()){
             return true;
         }
     }
@@ -123,8 +122,8 @@ function get_course_exam_date(course_code,exam_type)
 {
     course_code = course_code.toUpperCase();
     exam_type = exam_type.toUpperCase().trim();
-    if(course_code in course_database){
-        var res = course_database[course_code];
+    if(course_code in course_venue_database){
+        var res = course_venue_database[course_code];
         var keys = Object.keys(res);
         var slot = keys[0];
         if(!(exam_type in exam_slot_database)){

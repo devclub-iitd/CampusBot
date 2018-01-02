@@ -122,6 +122,10 @@
 			"start": "18:00",
 			"end": "18:50"
 		},
+		"WEDNESDAY": {
+			"start": "13:00",
+			"end": "13:50"
+		},
 		"FRIDAY": {
 			"start": "18:00",
 			"end": "18:50"
@@ -135,6 +139,46 @@
 		"THURSDAY": {
 			"start": "17:00",
 			"end": "18:20"
+		}
+	},
+	"AA":{
+		"MONDAY": {
+			"start": "14:00",
+			"end": "15:20"
+		},
+		"THURSDAY": {
+			"start": "14:00",
+			"end": "15:20"
+		}
+	},
+	"AB":{
+		"MONDAY": {
+			"start": "15:30",
+			"end": "16:50"
+		},
+		"THURSDAY": {
+			"start": "15:30",
+			"end": "16:50"
+		}
+	},
+	"AC":{
+		"TUESDAY": {
+			"start": "14:00",
+			"end": "15:20"
+		},
+		"FRIDAY": {
+			"start": "14:00",
+			"end": "15:20"
+		}
+	},
+	"AD":{
+		"TUESDAY": {
+			"start": "15:30",
+			"end": "16:50"
+		},
+		"FRIDAY": {
+			"start": "15:30",
+			"end": "16:50"
 		}
 	}
 }

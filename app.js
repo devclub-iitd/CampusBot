@@ -20,14 +20,26 @@ var QNA_SUBSCRIPTION_KEY = process.env.QNA_SUBSCRIPTION_KEY;
 var AZURE_DOCUMENT_DB_URI = process.env.AZURE_DOCUMENT_DB_URI;
 var AZURE_DOCUMENT_DB_KEY = process.env.AZURE_DOCUMENT_DB_KEY;
 
-var IS_SEM_RUNNING = process.env.IS_SEM_RUNNING
+var COURSES_RELEASED = process.env.COURSES_RELEASED
 
-if(IS_SEM_RUNNING.toUpperCase()=='TRUE'){
-    IS_SEM_RUNNING=true;
+if(COURSES_RELEASED.toUpperCase()=='TRUE'){
+    COURSES_RELEASED=true;
 }
 else{
-    IS_SEM_RUNNING=false;
+    COURSES_RELEASED=false;
 }
+
+var EXAMS_RELEASED = process.env.EXAMS_RELEASED
+
+if(EXAMS_RELEASED.toUpperCase()=='TRUE'){
+    EXAMS_RELEASED=true;
+}
+else{
+    EXAMS_RELEASED=false;
+}
+
+
+
 
 var introMessage = ['Main functionalities are described below-\n\nProfile : Say \'hi\' or \'setup\' at any time to setup your profile.\n\nFAQ : Say \'faq\' or \'question answer\' to ask the bot a FAQ about insti',
 'Class Schedule : Ask the bot "My schedule for the week" or "Monday schedule" or "schedule tomorrow" to get your lecture schedule.',
@@ -317,8 +329,8 @@ bot.dialog('/events',[
 
 bot.dialog('/exam',[
     function(session){
-        if(IS_SEM_RUNNING==false){
-            session.endDialog("Enjoy your Vacations !\nCheck after schedule has been released");
+        if(EXAMS_RELEASED==false){
+            session.endDialog("Exam Schedule not yet updated!\nCheck after schedule has been released");
         }
         else{
             builder.Prompts.choice(session,"Select exam","Minor1|Minor2|Major");
@@ -381,7 +393,7 @@ bot.dialog('/exam',[
 
 bot.dialog('/schedule',[
     function(session,args,next) {
-        if(IS_SEM_RUNNING==false){
+        if(COURSES_RELEASED==false){
             session.endDialog("Enjoy your Vacations !\nCheck after schedule has been released");
         }
         else{
@@ -480,11 +492,17 @@ bot.dialog('/schedule',[
 
 bot.dialog('/course',[
     function(session,args,next){
-        if(IS_SEM_RUNNING==false){
+        if(COURSES_RELEASED==false){
             session.endDialog("Enjoy your Vacations !\nCheck after schedule has been released");
         }
         else{
-            var coursecode = builder.EntityRecognizer.findEntity(args.entities, 'courseent');
+            var coursecode = undefined
+            try{
+                coursecode = builder.EntityRecognizer.findEntity(args.entities, 'courseent');
+            }
+            catch(e){
+                coursecode = undefined
+            }
             if (!coursecode) {
                 builder.Prompts.text(session,"Give me the course code");
             } else {
