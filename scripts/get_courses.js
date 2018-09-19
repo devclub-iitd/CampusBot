@@ -38,4 +38,5 @@ function saveJSON(data, filename) {
     e.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null)
     a.dispatchEvent(e)
 }
-saveJSON(database,"sem2-2017-18.json");
+saveJSON(database,process.env.DB_PATH+".json");
+//process.env.var_name
