@@ -1,0 +1,1 @@
+{"classifier":{"classFeatures":{"/main":{"0":2,"1":2,"2":2}},"classTotals":{"/main":4},"totalExamples":4,"smoothing":1},"docs":[{"label":"/main","text":["hi"]},{"label":"/main","text":["hello"]},{"label":"/main","text":["yo"]}],"features":{"hi":1,"hello":1,"yo":1},"stemmer":{},"lastAdded":3,"events":{"domain":null,"_events":{},"_eventsCount":0}}

@@ -10,6 +10,7 @@ var whois = require('./src/whois');
 var events = require('./src/events');
 var schedule = require('./src/schedule');
 var course = require('./src/course');
+var intelligence = require('./src/intelligence');
 
 
 var MICROSOFT_APP_ID = process.env.MICROSOFT_APP_ID;
@@ -62,45 +63,50 @@ var documentDbOptions = {
 
 var docDbClient = new azure.DocumentDbClient(documentDbOptions);
 var cosmosStorage = new azure.AzureBotStorage({ gzipData: false }, docDbClient);
+var inMemoryStorage = new builder.MemoryBotStorage();
 
-
-var bot = new builder.UniversalBot(connector).set('storage', cosmosStorage);;
+// var bot = new builder.UniversalBot(connector).set('storage', cosmosStorage);;
+var bot = new builder.UniversalBot(connector).set('storage', inMemoryStorage);;
 
 bot.endConversationAction('goodbye', 'Goodbye :)', { matches: /^(goodbye)|(bye)|(exit)|(end)|(quit)/i });
 
 
 
-var recognizer = new builder.LuisRecognizer('https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/8ada66e7-cfe5-4f02-beb9-80fffec5e15c?subscription-key='+LUIS_SUBSCRIPTION_KEY+'&verbose=true&timezoneOffset=0&q=');
-var intents = new builder.IntentDialog({ recognizers: [recognizer] });
+// var recognizer = new builder.LuisRecognizer('https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/8ada66e7-cfe5-4f02-beb9-80fffec5e15c?subscription-key='+LUIS_SUBSCRIPTION_KEY+'&verbose=true&timezoneOffset=0&q=');
+// var intents = new builder.IntentDialog({ recognizers: [recognizer] });
 
 var recognizerqna = new builder_cognitiveservices.QnAMakerRecognizer({
     knowledgeBaseId: QNA_KNOWLEDGE_ID,
-    subscriptionKey: QNA_SUBSCRIPTION_KEY});
+    subscriptionKey: QNA_SUBSCRIPTION_KEY
+});
     
-    var basicQnAMakerDialog = new builder_cognitiveservices.QnAMakerDialog({
-        recognizers: [recognizerqna],
-        defaultMessage: 'No match! Try changing the query terms!',
-        qnaThreshold: 0.3}
-    );
+var basicQnAMakerDialog = new builder_cognitiveservices.QnAMakerDialog({
+    recognizers: [recognizerqna],
+    defaultMessage: 'No match! Try changing the query terms!',
+    qnaThreshold: 0.3}
+);    
     
     
-    
-    
-bot.dialog('/', intents);
-intents.matches('main','/main');
-intents.matches('events', '/events');
-intents.matches('schedule', '/schedule');
-intents.matches('whois', '/whois');
-intents.matches('exam','/exam');
-intents.matches('qna','/qna');
-intents.matches('course','/course');
-intents.matches('profile', '/profile');
+// bot.dialog('/', intents);
+bot.dialog('/', function(session){
+    intelligence.classify(session.message.text, function(data){
+        session.beginDialog(String(data));        
+    });
+});
+// intents.matches('main','/main');
+// intents.matches('events', '/events');
+// intents.matches('schedule', '/schedule');
+// intents.matches('whois', '/whois');
+// intents.matches('exam','/exam');
+// intents.matches('qna','/qna');
+// intents.matches('course','/course');
+// intents.matches('profile', '/profile');
 bot.beginDialogAction('help', '/help', { matches: /^help/i });
-intents.matches('developers','/developers');
-intents.matches('repeat', '/repeat');
-intents.matches('messagePage','/messagePage');
+// intents.matches('developers','/developers');
+// intents.matches('repeat', '/repeat');
+// intents.matches('messagePage','/messagePage');
 
-intents.onDefault(builder.DialogAction.send("I'm sorry. I didn't understand."));
+// intents.onDefault(builder.DialogAction.send("I'm sorry. I didn't understand."));
 
 /*
 bot.dialog('/',[
@@ -122,7 +128,7 @@ bot.dialog('/main',[
         }
     },
     function(session,args,next) {
-        builder.Prompts.choice(session, "What would you like to get (type end to quit)?", "Message Page|Upcoming Events|Class Schedule|Who is|Exam Schedule|FAQ|Course Info|Profile Setup| Help|Developers");
+        builder.Prompts.choice(session, "What would you like to get (type end to quit)?", "Message Page|Upcoming Events|Class Schedule|Who is|Exam Schedule|Course Info|Profile Setup| Help|Developers");
     },
     function(session,results){
         if(results.response){
@@ -137,37 +143,13 @@ bot.dialog('/main',[
                     case "Class Schedule":
                         session.beginDialog('/schedule');
                         break;
-                    case "Complaint":
-                        session.beginDialog('/complaint');
-                        break;
-                    case "Converse":
-                        session.beginDialog('/converse');
-                        break;
-                    case "Papers Download":
-                        session.beginDialog('/papers');
-                        break;
                     case "Who is":
                         session.beginDialog('/whois');
-                        break;
-                    case "Mess Schedule":
-                        session.beginDialog('/mess');
                         break;
                     case "Profile Setup":
                         session.userData.en = undefined;
                         session.userData.name = undefined;
                         session.beginDialog('/profile');
-                        break;
-                    case "FAQ":
-                        session.beginDialog('/qna');
-                        break;
-                    case "Course Review":
-                        session.beginDialog('/review');
-                        break;
-                    case "Course Material":
-                        session.beginDialog('/material');
-                        break;
-                    case "TimePass":
-                        session.beginDialog('/converse');
                         break;
                     case "Exam Schedule":
                         session.beginDialog('/exam');
@@ -185,6 +167,30 @@ bot.dialog('/main',[
                         session.send('Hi! Send your message to the page admins\n Type end to chat with Campus-Bot');
                         session.beginDialog('/messagePage');
                         break;
+                    // case "Complaint":
+                    //     session.beginDialog('/complaint');
+                        // break;
+                    // case "Converse":
+                    //     session.beginDialog('/converse');
+                    //     break;
+                    // case "Papers Download":
+                    //     session.beginDialog('/papers');
+                    //     break;
+                    // case "Mess Schedule":
+                    //     session.beginDialog('/mess');
+                    //     break;
+                    // case "FAQ":
+                    //     session.beginDialog('/qna');
+                    //     break;
+                    // case "Course Review":
+                    //     session.beginDialog('/review');
+                    //     break;
+                    // case "Course Material":
+                    //     session.beginDialog('/material');
+                    //     break;
+                    // case "TimePass":
+                    //     session.beginDialog('/converse');
+                    //     break;
                 }
             }
         }
@@ -292,15 +298,15 @@ bot.dialog('/developers', [
     }
 ]);
 
-bot.dialog('/repeat', [
-    function (session) {
-        builder.Prompts.text(session, 'Hi! I repeat everything!');
-    },
-    function (session, results) {
-        session.send(results.response);
-        session.endDialog();
-    }
-]);
+// bot.dialog('/repeat', [
+//     function (session) {
+//         builder.Prompts.text(session, 'Hi! I repeat everything!');
+//     },
+//     function (session, results) {
+//         session.send(results.response);
+//         session.endDialog();
+//     }
+// ]);
 
 bot.dialog('/events',[
     function(session,args)
@@ -523,37 +529,37 @@ bot.dialog('/course',[
 ]);
 
 
-bot.dialog('/qna', [
-    function (session) {
-        builder.Prompts.text(session, 'Ask me anything!');
-    },
-    function (session, results) {
-        var postBody = '{"question":"' + results.response + '"}';
-        console.log(postBody)
-            request({
-                url: "https://westus.api.cognitive.microsoft.com/qnamaker/v2.0/knowledgebases/"+QNA_KNOWLEDGE_ID+"/generateAnswer",
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Ocp-Apim-Subscription-Key': QNA_SUBSCRIPTION_KEY
-                },
-                body: postBody
-            },
-            function (error, response, body) {
-                var result;
-                result = JSON.parse(body);
-                result = result.answers[0];
-                if(result.score < 50){
-                    session.endDialog('Did not find a good answer for yout question :(')
-                }
-                else{
-                    session.endDialog(result.answer);
-                }
-            }
-            );
-        session.endDialog();
-    }
-]);
+// bot.dialog('/qna', [
+//     function (session) {
+//         builder.Prompts.text(session, 'Ask me anything!');
+//     },
+//     function (session, results) {
+//         var postBody = '{"question":"' + results.response + '"}';
+//         console.log(postBody)
+//             request({
+//                 url: "https://westus.api.cognitive.microsoft.com/qnamaker/v2.0/knowledgebases/"+QNA_KNOWLEDGE_ID+"/generateAnswer",
+//                 method: 'POST',
+//                 headers: {
+//                     'Content-Type': 'application/json',
+//                     'Ocp-Apim-Subscription-Key': QNA_SUBSCRIPTION_KEY
+//                 },
+//                 body: postBody
+//             },
+//             function (error, response, body) {
+//                 var result;
+//                 result = JSON.parse(body);
+//                 result = result.answers[0];
+//                 if(result.score < 50){
+//                     session.endDialog('Did not find a good answer for yout question :(')
+//                 }
+//                 else{
+//                     session.endDialog(result.answer);
+//                 }
+//             }
+//             );
+//         session.endDialog();
+//     }
+// ]);
 
 bot.dialog('/messagePage', [
     function (session) {

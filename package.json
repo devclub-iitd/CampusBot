@@ -12,8 +12,10 @@
     "botbuilder": "^3.12.0",
     "botbuilder-azure": "^3.0.4",
     "botbuilder-cognitiveservices": "^1.1.0",
+    "fast-csv": "^2.4.1",
     "fb": "^2.0.0",
     "fs-extra": "^4.0.2",
+    "natural": "^0.6.1",
     "restify": "^6.3.4"
   }
 }
