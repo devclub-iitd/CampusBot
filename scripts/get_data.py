@@ -87,7 +87,7 @@ def scrap(db_path,write_csv):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
             description='Academics1 Scrap IITD')
-    parser.add_argument('db_path', metavar='PATH',
+    parser.add_argument('db_path', metavar='DB_PATH',
                             help='path to the database folder containg courses.json')
     parser.add_argument('--writecsv',action='store_true',
                         help='Turn on to Store the CSV Files scrapped')
@@ -96,4 +96,5 @@ if __name__ == "__main__":
 
     DATABASE_PATH = args.db_path
     WRITE_CSV = args.writecsv
+    print (WRITE_CSV,"AAA")
     scrap(DATABASE_PATH,WRITE_CSV)

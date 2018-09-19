@@ -21,7 +21,7 @@ def parse_csv(db_path):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
             description='Academics1 Scrap IITD')
-    parser.add_argument('db_path', metavar='PATH',
+    parser.add_argument('db_path', metavar='DB_PATH',
                             help='path to the database folder containg courses.json and venue.csv')
 
     args = parser.parse_args()
