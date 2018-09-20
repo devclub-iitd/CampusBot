@@ -1,4 +1,29 @@
 'hi', /main
 'hello', /main
 'yo', /main
-'How are you', /main
+'Tell me the events going on now', /events
+'events', /events
+'Events on campus', /events
+'schedule', /schedule
+'course schedule', /schedule
+'semester schedule', /schedule
+'time table', /schedule
+'I want to know my time table', /schedule
+'whois', /whois
+'Who is Someone', /whois
+'Who is Something', /whois
+'exam', /exam
+'Minors', /exam
+'Exam Schedule', /exam
+'Minor Schedule', /exam
+'Major Schedule', /exam
+'Majors', /exam
+'qna', /qna
+'course', /course
+'Courses in this semester', /course
+'profile', /profile
+'developers', /developers
+'I want to talk to the club', /messagePage
+'message', /messagePage
+'bot', /bot
+'(bot)', /bot

@@ -48,6 +48,9 @@ var introMessage = ['Main functionalities are described below-\n\nProfile : Say 
 'Course info :  Ask "Course information COL216" or "details of COL331 course to see some details about that course.\n\n'
 ];
 
+var talk_to_bot = false;
+var talk_to_human = false;
+
 // Create chat connector for communicating with the Bot Framework Service
 var connector = new builder.ChatConnector({
     appId: MICROSOFT_APP_ID,
@@ -88,11 +91,75 @@ var basicQnAMakerDialog = new builder_cognitiveservices.QnAMakerDialog({
     
     
 // bot.dialog('/', intents);
-bot.dialog('/', function(session){
-    intelligence.classify(session.message.text, function(data){
-        session.beginDialog(String(data));        
-    });
-});
+bot.dialog('/', [
+    function(session, args, next){
+        if((!talk_to_bot) && (!talk_to_human)){    
+            if(!session.userData.en || !session.userData.name){
+                builder.Prompts.text(session, "Hi! I am Campus-Bot. If you want to talk to the club members please type in (message) and if you want to interact with me please type in (bot)");
+                next();
+                // session.beginDialog('/profile');
+            }
+            else{
+                builder.Prompts.text(session, "Hi " + session.userData.name + "! I am Campus-Bot. If you want to talk to the club members please type in (message) and if you want to interact with me please type in (bot)");
+                next();
+            }
+        }else{
+            next();
+        }
+    },
+    function(session, results, next){
+        if((!talk_to_bot) && (!talk_to_human)){
+            if(results.response){
+                if((results.response === "bot") || (results.response  === "(bot)")){
+                    talk_to_bot = true;
+                    talk_to_human = false;
+                    next()
+                }else{
+                    session.send('Hi! Send your message to the club members\n Type <end> to end chat with members and chat with Campus-Bot');        
+                    talk_to_human = true;
+                    talk_to_bot = false;
+                    session.beginDialog('/messagePage');
+                }
+            }else{
+                talk_to_human = false;
+                talk_to_bot = false;
+                session.endDialog("Invalid Response. You can call again by saying Hi");
+            }
+        }else if(talk_to_bot){
+            next();
+        }else{
+            if(results.response === undefined){
+                talk_to_bot = false;
+                talk_to_human = false;
+                session.beginDialog('/');
+            }else{
+                session.beginDialog('/messagePage');        
+            }
+        }
+    },
+    function (session, args, next) {
+        // session.beginDialog('/main');
+        intelligence.classify(session.message.text, function(data){
+            if(data != ""){
+                session.beginDialog(String(data));
+            }else{
+                session.beginDialog('/main');
+            }
+        });        
+    }
+]);
+
+// bot.dialog('/bot', [
+//     function(session, args, next){
+//         intelligence.classify(session.message.text, function(data){
+//             session.beginDialog(String(data));
+//         });
+//     },
+//     function(session, args, next){
+//         session.replaceDialog('/bot');
+//     } 
+// ]);
+
 // intents.matches('main','/main');
 // intents.matches('events', '/events');
 // intents.matches('schedule', '/schedule');
@@ -102,6 +169,7 @@ bot.dialog('/', function(session){
 // intents.matches('course','/course');
 // intents.matches('profile', '/profile');
 bot.beginDialogAction('help', '/help', { matches: /^help/i });
+// bot.beginDialogAction('end', '/end', { matches: /^help/i });
 // intents.matches('developers','/developers');
 // intents.matches('repeat', '/repeat');
 // intents.matches('messagePage','/messagePage');
@@ -118,6 +186,10 @@ bot.dialog('/',[
 ]);
 */
 
+bot.dialog('/bot', function(session){
+    session.beginDialog('/main');
+});
+
 bot.dialog('/main',[
     function(session,args,next) {
         if(!session.userData.en || !session.userData.name){
@@ -133,6 +205,8 @@ bot.dialog('/main',[
     function(session,results){
         if(results.response){
             if(results.response.entity === 'Exit'){
+                talk_to_human = false;
+                talk_to_bot = false;
                 session.endDialog("Thanks for using. You can chat again by saying Hi");
             }
             else{
@@ -195,6 +269,8 @@ bot.dialog('/main',[
             }
         }
         else{
+            talk_to_human = false;
+            talk_to_bot = false;
             session.endDialog("Invalid Response. You can call again by saying Hi");
         }
     },
@@ -207,23 +283,38 @@ bot.dialog('/main',[
 bot.dialog('/help',[
     function(session)
     {
-        var introCard = new builder.HeroCard(session)
-                .title("Campus Bot")
-                .text("Your own campus assistant")
-                .images([
-                    builder.CardImage.create(session, "https://s24.postimg.org/jwjmzedid/dev.png")
-                ]);
-        var msg = new builder.Message(session).attachments([introCard]);
-        session.send(msg);
-        introMessage.forEach(function(ms){
-            session.send(ms);
-        });
-        session.endDialog();
+        if(talk_to_bot){ 
+            var introCard = new builder.HeroCard(session)
+                    .title("Campus Bot")
+                    .text("Your own campus assistant")
+                    .images([
+                        builder.CardImage.create(session, "https://s24.postimg.org/jwjmzedid/dev.png")
+                    ]);
+            var msg = new builder.Message(session).attachments([introCard]);
+            session.send(msg);
+            introMessage.forEach(function(ms){
+                session.send(ms);
+            });
+            session.endDialog();
+        }
+        // session.replaceDialog('/main');
     }
 ]);
 
 bot.dialog('/profile', [
     function (session, args, next) {
+        builder.Prompts.text(session, "Hi! Do you have your entry number? (Yes/No)");
+    },function (session, results, next) {
+        if(results.response.toLowerCase().match("yes")){
+            next()
+        }else{
+            session.send("We are sorry but External people can't interact with Campus-Bot.");
+            talk_to_bot = false;
+            talk_to_human = false;
+            session.replaceDialog('/');
+            // session.endDialog();
+        }
+    },function (session, args, next) {
         builder.Prompts.text(session, "What is your entry number?");
     },
     function (session, results, next) {
@@ -240,7 +331,8 @@ bot.dialog('/profile', [
                 session.send('Hi '+session.userData.name+", Welcome to CampusBot");
             }
         }
-        session.endDialog();
+        session.replaceDialog('/main');
+        // session.endDialog();
     }
 ]);
 
@@ -287,14 +379,16 @@ bot.dialog('/whois', [
                     .attachments(attach);
             session.send(msg);
         }
-        session.endDialog();
+        session.replaceDialog('/main');
+        // session.endDialog();
     }
 ]);
 
 bot.dialog('/developers', [
     function (session) {
         session.send('The Developers are : \n1. Aman Agrawal \n2. Suyash Agrawal \n3. Madhur Singhal');
-        session.endDialog();
+        session.replaceDialog('/main');
+        // session.endDialog();
     }
 ]);
 
@@ -328,7 +422,8 @@ bot.dialog('/events',[
             var msg = new builder.Message(session)
                     .attachmentLayout(builder.AttachmentLayout.carousel)
                     .attachments(attach);
-            session.endDialog(msg);
+            session.replaceDialog('/main');
+            // session.endDialog(msg);
         });
     }
 ]);
@@ -384,15 +479,21 @@ bot.dialog('/exam',[
                                     .attachments(attach);
                         session.send(msg);
                     }
-                    session.endDialog("All the Best for Exams");
+                    // session.endDialog("All the Best for Exams");
+                    session.send("All the Best for Exams");
+                    session.replaceDialog('/main');
                 }
             }
             else{
-                session.endDialog("Sorry, some error occurred");
+                // session.endDialog("Sorry, some error occurred");
+                session.send("Sorry, some error occurred");
+                session.replaceDialog('/main');
             }
         }
         else{
-            session.endDialog("You entered an invalid response");
+            // session.endDialog("You entered an invalid response");
+            session.send("You entered an invalid response");
+            session.replaceDialog('/main');
         }
     }
 ]);
@@ -492,7 +593,8 @@ bot.dialog('/schedule',[
             session.userData.en = undefined;
             session.send("Invalid entry number provided!");
         }
-        session.endDialog();
+        session.replaceDialog('/main');
+        // session.endDialog();
     }
 ]);
 
@@ -524,7 +626,8 @@ bot.dialog('/course',[
         else {
             session.send(course.pretty_course(c));
         }
-        session.endDialog();
+        session.replaceDialog('/main');
+        // session.endDialog();
     }
 ]);
 
