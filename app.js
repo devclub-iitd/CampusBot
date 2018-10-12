@@ -11,7 +11,8 @@ var events = require('./src/events');
 var schedule = require('./src/schedule');
 var course = require('./src/course');
 var intelligence = require('./src/intelligence');
-
+var verificationController = require('./src/FBverification');
+// var messageWebhookController = require('./src/messageWebhook');
 
 var MICROSOFT_APP_ID = process.env.MICROSOFT_APP_ID;
 var MICROSOFT_APP_PASSWORD = process.env.MICROSOFT_APP_PASSWORD;
@@ -20,8 +21,7 @@ var QNA_KNOWLEDGE_ID = process.env.QNA_KNOWLEDGE_ID;
 var QNA_SUBSCRIPTION_KEY = process.env.QNA_SUBSCRIPTION_KEY;
 var AZURE_DOCUMENT_DB_URI = process.env.AZURE_DOCUMENT_DB_URI;
 var AZURE_DOCUMENT_DB_KEY = process.env.AZURE_DOCUMENT_DB_KEY;
-
-var COURSES_RELEASED = process.env.COURSES_RELEASED
+var COURSES_RELEASED = process.env.COURSES_RELEASED;
 
 if(COURSES_RELEASED.toUpperCase()=='TRUE'){
     COURSES_RELEASED=true;
@@ -52,6 +52,7 @@ var talk_to_bot = false;
 var talk_to_human = false;
 
 // Create chat connector for communicating with the Bot Framework Service
+// console.log();
 var connector = new builder.ChatConnector({
     appId: MICROSOFT_APP_ID,
     appPassword: MICROSOFT_APP_PASSWORD
@@ -1099,4 +1100,6 @@ server.listen(process.env.port || process.env.PORT || 3978, function () {
 
 
 // Listen for messages from users 
+server.get('/', verificationController);
+// server.post('/message', messageWebhookController);
 server.post('/api/messages', connector.listen());
