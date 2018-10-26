@@ -2,7 +2,7 @@ var builder = require('botbuilder');
 var builder_cognitiveservices = require("botbuilder-cognitiveservices");
 var azure = require('botbuilder-azure'); 
 var request = require('request');
-
+var bodyParser = require('body-parser');
 
 // Custom JS for various functionalities 
 var entry2name = require('./src/entry2name');
@@ -1094,6 +1094,8 @@ bot.dialog('/review', [
 // Setup Restify Server
 var restify = require('restify');
 var server = restify.createServer();
+server.use(bodyParser.json());
+server.use(bodyParser.urlencoded({extended:true}));
 server.listen(process.env.port || process.env.PORT || 3978, function () {
    console.log('%s listening to %s', server.name, server.url); 
 });

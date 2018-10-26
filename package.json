@@ -9,6 +9,7 @@
   "author": "Aman Agrawal",
   "license": "ISC",
   "dependencies": {
+    "body-parser": "^1.18.3",
     "ajax-request": "^1.2.3",
     "botbuilder": "^3.12.0",
     "botbuilder-azure": "^3.0.4",
