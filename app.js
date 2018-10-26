@@ -347,7 +347,7 @@ bot.dialog('/whois', [
         nameoren = [];
       }
       if (!nameoren || nameoren.length === 0) {
-         builder.Prompts.text(session, 'Give me a Name or an Entry number');
+         builder.Prompts.text(session, 'Give me the Entry number you want to lookup');
       } else {
         var name ="";
         for( var i =0; i<nameoren.length-1;i++)
@@ -365,10 +365,10 @@ bot.dialog('/whois', [
         }
         else {
             var attach = [];
-            result = whois.priority(result,session.userData.en);
-            if(result.length > 4){
-                session.send("Your query was too general. Here are top 4 results personalized for you :");
-            }
+            // result = whois.priority(result,session.userData.en);
+            // if(result.length > 4){
+            //     session.send("Your query was too general. Here are top 4 results personalized for you :");
+            // }
             for(var i=0;i<result.length && i < 4;i++){
                 attach.push(
                     new builder.HeroCard(session)
@@ -1102,4 +1102,4 @@ server.listen(process.env.port || process.env.PORT || 3978, function () {
 // Listen for messages from users 
 server.get('/', verificationController);
 // server.post('/message', messageWebhookController);
-server.post('/api/messages', connector.listen());
+server.post('/', connector.listen());
