@@ -5,7 +5,7 @@
 // var http = require('http');
 var request = require('request');
 // var STUDENT_DB_PATH = "./database/"+process.env.DB_PATH+"/student.json";
-var URL = "http://10.194.14.14:4900/api/studentRecords";
+var URL = "http://localhost:3000/api/studentRecords";
 var key = process.env.PANT_API_KEY;
 var appname = process.env.APPNAME;
 // var STUDENT_DB = JSON.parse(fs.readFileSync(STUDENT_DB_PATH));
@@ -117,11 +117,17 @@ function get_data(entry) {
 	request.post(URL, {
 			// url: URL,
 			// contentType: 'application/x-www-form-urlencoded',
+			// headers: {
+			// 	"api-key": key,
+			// 	"application-name": appname
+			// },
 			headers: {
-				"api-key": key,
-				"application-name": appname
-			},
-			body: require('querystring').stringify(body)
+		        "api-key": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhcHBsaWNhdGlvbl9uYW1lIjoiQ2FtcHVzQm90IiwiYXBpX2xpc3QiOlsiTERBUCIsIkNPVVJTRVMiLCJTVFVDT1VSU0VTIiwiU0NIRURVTEUiLCJFWEFNU0NIRURVTEUiXSwidGltZXN0YW1wIjoiMjAxOC0xMC0yNiAyMzo1MzoyMiJ9.yozJy206u4_evifWIR5EDGmbvsb2E2DPEz-T8hypM7U",
+		        "application-name": "CampusBot",
+		        "Content-Type":"application/x-www-form-urlencoded"
+		      },
+		    form:{uid:"cs5160394"}
+			// body: require('querystring').stringify(body)
 		}, function(err, res, body) {
 			// console.log(res);
 			console.log(body);
