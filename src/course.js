@@ -4,9 +4,9 @@ var URL = process.env.PANT_URL_COURSE;
 var key = process.env.PANT_API_KEY;
 var appname = process.env.APPNAME;
 
-var COURSES_DB_PATH ="./database/"+process.env.DB_PATH+"/courses.json";
+// var COURSES_DB_PATH ="./database/"+process.env.DB_PATH+"/courses.json";
 
-var course_db = JSON.parse(fs.readFileSync(COURSES_DB_PATH));
+// var course_db = JSON.parse(fs.readFileSync(COURSES_DB_PATH));
 
 function get_course(code)
 {
