@@ -1,4 +1,9 @@
 var fs = require("fs-extra");
+var request = require('request');
+var URL = process.env.PANT_URL_COURSE_SCHEDULE;
+var URL_EXAM = process.env.PANT_URL_EXAM_SCHEDULE;
+var key = process.env.PANT_API_KEY;
+var appname = process.env.APPNAME;
  
 if(process.env.COURSES_RELEASED.toUpperCase()=='TRUE'){
     var STUDENT_DB_PATH = "./database/"+process.env.DB_PATH+"/student.json";
@@ -15,45 +20,85 @@ if(process.env.EXAMS_RELEASED.toUpperCase()=='TRUE'){
     var exam_slot_database = JSON.parse(fs.readFileSync(EXAM_SLOT_DB_PATH));
 }
 
-
-function get_exam_schedule(exam_type,courses)
+function get_exam_schedule(exam_type,entry)
 {
-    exam_type = exam_type.toUpperCase().trim();
-    if(!(exam_type in exam_slot_database))
-    {
-        return undefined;
+    var exams;
+    if (exam_type.toUpperCase() == "MINOR1"){
+        exams = "M1"
+    }else if(exam_type.toUpperCase() == "MINOR2"){
+        exams = "M2"
+    }else{
+        exams = "MJ"
     }
-    else
-    {
-        var sch = exam_slot_database[exam_type];
-        var res = [];
-        for(var i=0;i<sch.length;i++)
-        {
-            var resp = [];
-            resp.push(sch[i][0]);
-            for(var j=1;j<sch[i].length;j++)
-            {
-                for(var k=0;k<courses.length;k++)
-                {
-                    if(courses[k].slot === sch[i][j])
-                    {
-                        resp.push(courses[k]);
-                    }
-                }
+    console.log(URL_EXAM + "?entry=" + entry.toUpperCase() + "&exam_type=" + exams)
+    request.get(URL_EXAM + "?entry=" + entry.toUpperCase() + "&exam_type=" + exams, {
+            headers: {
+                "api-key": key,
+                "application-name": appname,
+                "Content-Type":"application/x-www-form-urlencoded"
             }
-            res.push(resp);
-        }
-        var final = [];
-        for(var t=0;t<res.length;t++)
-        {
-            if(res[t].length > 1)
-            {
-                final.push(res[t]);
+            // ,
+            // params: {
+            //     "entry": entry.toUpperCase(),
+            //     "exam_type": exams
+            // }
+        }, function(err, res, body) {
+            console.log(body);
+            var parsed_body = JSON.parse(body);
+            if(err){
+                console.log(err);
+                return undefined;
             }
-        }
-        return final;
-    }
+            var to_ret = []
+            for (var sub in parsed_body){
+                // console.log(parsed_body[sub])
+                var obj = {}
+                obj.code = parsed_body[sub].course_code
+                obj.slot = parsed_body[sub].slot
+                obj.date = parsed_body[sub].date
+                to_ret.push(obj)
+            }
+            console.log(to_ret)
+            return to_ret;
+    });
+
+    // exam_type = exam_type.toUpperCase().trim();
+    // if(!(exam_type in exam_slot_database))
+    // {
+    //     return undefined;
+    // }
+    // else
+    // {
+    //     var sch = exam_slot_database[exam_type];
+    //     var res = [];
+    //     for(var i=0;i<sch.length;i++)
+    //     {
+    //         var resp = [];
+    //         resp.push(sch[i][0]);
+    //         for(var j=1;j<sch[i].length;j++)
+    //         {
+    //             for(var k=0;k<courses.length;k++)
+    //             {
+    //                 if(courses[k].slot === sch[i][j])
+    //                 {
+    //                     resp.push(courses[k]);
+    //                 }
+    //             }
+    //         }
+    //         res.push(resp);
+    //     }
+    //     var final = [];
+    //     for(var t=0;t<res.length;t++)
+    //     {
+    //         if(res[t].length > 1)
+    //         {
+    //             final.push(res[t]);
+    //         }
+    //     }
+    //     return final;
+    // }
 }
+// get_exam_schedule("Minor1", "2016CS50393")
 
 /* pass an object containing fields course and slot */
 function get_class_schedule(course)
@@ -147,17 +192,49 @@ function get_course_exam_date(course_code,exam_type)
     }
 }
 
-function get_week_schedule(courses)
+function get_week_schedule(entry)
 {
     var week = ["MONDAY","TUESDAY","WEDNESDAY","THURSDAY","FRIDAY"];
     var schedule = {};
-    for(var i=0;i<week.length;i++)
-    {
-        schedule[week[i]] = get_day_schedule(week[i],courses);
-    }
-    return schedule;
-}
+    request.get(URL + "?entry=" + entry, {
+            headers: {
+                "api-key": key,
+                "application-name": appname,
+                "Content-Type":"application/x-www-form-urlencoded"
+            }
+            // ,
+            // params:{
+            //     "entry": "2016CS50393"
+            // }
+        }, function(err, res, body) {
+            console.log(body);
+            var parsed_body = JSON.parse(body)
+            if(err){
+                console.log(err);
+                return undefined;
+            }
+            var to_ret = []
+            for (var sub in parsed_body){
+                var obj = {}
+                obj.code = parsed_body[sub].course_code
+                obj.room = parsed_body[sub].room
+                obj.schedule = parsed_body[sub].schedule
+                to_ret.push(obj)
+            }
+            console.log(to_ret)
+            return to_ret;
 
+
+            // result.push(synthesize(entry, body.name));          
+            // return result;
+            // for(var i=0;i<body.length;i++)
+            // {
+            //     schedule[week[i]] = get_day_schedule(week[i],courses);
+            // }
+            // return body.schedule;
+    });
+}
+// get_week_schedule("2016CS50393")
 function pretty_day_schedule(day,schedule)
 {
     if(schedule !== undefined)

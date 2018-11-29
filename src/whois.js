@@ -5,7 +5,7 @@
 // var http = require('http');
 var request = require('request');
 // var STUDENT_DB_PATH = "./database/"+process.env.DB_PATH+"/student.json";
-var URL = "http://localhost:3000/api/studentRecords";
+var URL = process.env.PANT_URL_WHOIS;
 var key = process.env.PANT_API_KEY;
 var appname = process.env.APPNAME;
 // var STUDENT_DB = JSON.parse(fs.readFileSync(STUDENT_DB_PATH));
@@ -103,17 +103,16 @@ function get_form(details){
 function get_data(entry) {
 	var result = [];
 	// entry = entry.toUpperCase();
-	console.log(appname);
-	console.log(key);
+	// console.log(appname);
+	// console.log(key);
 	// var formData = new FormData();
 	// formData.append("uid", entry_to_uid(entry));
-	var body = {
-		"uid": "cs5160393"
-	}
+	// var body = {
+	// 	"uid": entry
+	// }
 	// var formBody = [];
 	// formBody = get_form(body);
 	// console.log(formBody);
-
 	request.post(URL, {
 			// url: URL,
 			// contentType: 'application/x-www-form-urlencoded',
@@ -122,11 +121,13 @@ function get_data(entry) {
 			// 	"application-name": appname
 			// },
 			headers: {
-		        "api-key": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhcHBsaWNhdGlvbl9uYW1lIjoiQ2FtcHVzQm90IiwiYXBpX2xpc3QiOlsiTERBUCIsIkNPVVJTRVMiLCJTVFVDT1VSU0VTIiwiU0NIRURVTEUiLCJFWEFNU0NIRURVTEUiXSwidGltZXN0YW1wIjoiMjAxOC0xMC0yNiAyMzo1MzoyMiJ9.yozJy206u4_evifWIR5EDGmbvsb2E2DPEz-T8hypM7U",
-		        "application-name": "CampusBot",
+		        "api-key": key,
+		        "application-name": appname,
 		        "Content-Type":"application/x-www-form-urlencoded"
 		      },
-		    form:{uid:"cs5160394"}
+		    form:{
+		    	"uid": entry.toLowerCase()
+		    }
 			// body: require('querystring').stringify(body)
 		}, function(err, res, body) {
 			// console.log(res);
@@ -149,7 +150,7 @@ function get_data(entry) {
 function make_story(data) {
 	return data.name+"\n\nEntry No. "+data.entry+"\n\nContact at - "+data.email+"\n\n";
 }
-get_data("2016CS50393");
+// get_data("CS5160393");
 
 module.exports = {
 	identify: get_data,

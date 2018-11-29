@@ -373,7 +373,7 @@ bot.dialog('/whois', [
                 attach.push(
                     new builder.HeroCard(session)
                         .title(result[i].name)
-                        .text("Entry - "+result[i].entry+"\n"+"Email - "+result[i].email)
+                        .text("department - "+result[i].department+"\n"+"Email - "+result[i].altEmail)
                     );
             }
             var msg = new builder.Message(session)
@@ -444,10 +444,11 @@ bot.dialog('/exam',[
             if(!session.userData.en){
                 session.beginDialog('/profile');
             }
-            var courses = schedule.courses(session.userData.en);
-            if(courses){
-                session.userData.exam_type = results.response.entity;
-                var sch = schedule.exam_schedule(results.response.entity,courses.courses);
+            // var courses = schedule.courses(session.userData.en);
+            // if(courses){
+            session.userData.exam_type = results.response.entity;
+            var sch = schedule.exam_schedule(results.response.entity,session.userData.en);
+            if(sch !== undefined){
                 if(sch.length === 0){
                     var attach = [];
                     attach.push(
@@ -459,23 +460,29 @@ bot.dialog('/exam',[
                                     .attachments(attach);
                 }
                 else{
-                    var week = ["SUNDAY","MONDAY","TUESDAY","WEDNESDAY","THURSDAY","FRIDAY","SATURDAY"];
+                    //var week = ["SUNDAY","MONDAY","TUESDAY","WEDNESDAY","THURSDAY","FRIDAY","SATURDAY"];
                     for(var day in sch){
                         var attach = [];
-                        var parts = sch[day][0].split("/");
-                        var dt = new Date(parseInt(parts[2], 10),
-                                          parseInt(parts[1], 10) - 1,
-                                          parseInt(parts[0], 10));
-                        session.send(dt.toDateString());
-                        for(var i=1;i<sch[day].length;i++){
-                            var c = course.get_course(sch[day][i].course);
-                            var slot = sch[day][i].slot;
-                            attach.push(
-                                new builder.HeroCard(session)
-                                    .title(c.code+"("+slot+")")
-                                    .subtitle(c.name)
-                            );
-                        }
+                        // var parts = sch[day][0].split("/");
+                        // var dt = new Date(parseInt(parts[2], 10),
+                        //                   parseInt(parts[1], 10) - 1,
+                        //                   parseInt(parts[0], 10));
+                        // session.send(dt.toDateString());
+                        session.send(sch[day].date);
+                        attach.push(
+                            new builder.HeroCard(session)
+                                .title(sch[day].slot+"("+slot+")")
+                                .subtitle(sch[day].code)
+                        );
+                        // for(var i=1;i<sch[day].length;i++){
+                        //     // var c = course.get_course(sch[day][i].course);
+                        //     // var slot = sch[day][i].slot;
+                        //     attach.push(
+                        //         new builder.HeroCard(session)
+                        //             .title(c.code+"("+slot+")")
+                        //             .subtitle(c.name)
+                        //     );
+                        // }
                         var msg = new builder.Message(session)
                                     .attachments(attach);
                         session.send(msg);
@@ -536,10 +543,11 @@ bot.dialog('/schedule',[
         if (results.response) {
             session.userData.en = results.response;
         }
-        var courses = schedule.courses(session.userData.en);
-        if(courses !== undefined)
-        {
-            var week = schedule.week_schedule(courses.courses);
+        // var courses = schedule.courses(session.userData.en);
+        // if(courses !== undefined)
+        // {
+        var week = schedule.week_schedule(session.userData.en);
+        if(week !== undefined){
             if(day === undefined)
             {
                 for(var i in week)
@@ -547,12 +555,12 @@ bot.dialog('/schedule',[
                     var attach = [];
                     if(week[i] !== undefined)
                     {
-                        for(var c in week[i])
+                        for(var c in days)
                         {
                             attach.push(
                                     new builder.ThumbnailCard(session)
-                                        .title(week[i][c].course)
-                                        .text(week[i][c].location+": "+week[i][c].timing.start+"-"+week[i][c].timing.end)
+                                        .title(week[i].code)
+                                        .text(week[i].room+": "+week[i].schedule.days[c].start+"-"+week[i].schedule.days[c].end)
                             );
                         }
                         var msg = new builder.Message(session)
@@ -574,21 +582,22 @@ bot.dialog('/schedule',[
                 {
                     var attach = [];
                     day = day.toUpperCase();
-                    for(var i in week[day])
-                    {
-                        attach.push(
-                            new builder.ThumbnailCard(session)
-                                .title(week[day][i].course)
-                                .text(week[day][i].location+": "+week[day][i].timing.start+"-"+week[day][i].timing.end)
-                            );
-                    }
-                    var msg = new builder.Message(session)
-                            .attachments(attach);
-                    session.send(day);
-                    session.send(msg);
-                }
-            }
-        }
+	                for (var j in week)
+	                    if(week[j].schedule.days[day] !== undefined)
+	                    {
+	                        attach.push(
+	                            new builder.ThumbnailCard(session)
+	                                .title(week[j].code)
+	                                .text(week[j].room+": "+ week[j].schedule.days[day].start+"-"+week[j].schedule.days[day].end)
+	                            );
+	                    }
+            	}
+                var msg = new builder.Message(session)
+                        .attachments(attach);
+                session.send(day);
+                session.send(msg);
+ 	       }
+        }    
         else
         {
             session.userData.en = undefined;
